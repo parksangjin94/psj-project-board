@@ -35,7 +35,7 @@ class ArticleControllerTest {
                 .andExpect(MockMvcResultMatchers.model().attributeExists("articles")); // map에 ""키가 있는지 확인
     }
 
-    @Disabled("구현 중") // 테스트를 통과하지 못할 시 빌드가 실패하기 때문에 처리
+//    @Disabled("구현 중") // 테스트를 통과하지 못할 시 빌드가 실패하기 때문에 처리
     @DisplayName("[view][GET] 게시글 상세 페이지 - 정상 호출")
     @Test
     public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {

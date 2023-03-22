@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!-- 타임리프 디커플드 로직 사용-->
+<thlogic>
+    <attr sel="#header" th:replace="header :: header"/>
+    <attr sel="#footer" th:replace="footer :: footer"/>
+</thlogic>
