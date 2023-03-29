@@ -5,7 +5,7 @@ import com.psj.projectboard.domain.Article;
 
 import java.time.LocalDateTime;
 
-public record ArticleDto(
+public record ArticleDto(  // record 클래스는 getter, setter가 포함되어 있다.
         Long id,
         UserAccountDto userAccountDto,
         String title,
