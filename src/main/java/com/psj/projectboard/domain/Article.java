@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @Table(indexes = {
         @Index(columnList = "title"),
         @Index(columnList = "hashtag"),
@@ -25,20 +25,20 @@ import java.util.Set;
 })
 
 @Entity
-public class Article extends AuditingFields {
+public class Article extends AuditingFields  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
+    @Setter @ManyToOne(optional = false) private UserAccount userAccount; // 유저 정보(ID)
     @Setter @Column(nullable = false) private String title; // 제목
     @Setter @Column(nullable = false, length = 10000) private String content; // 본문
 
     @Setter private String hashtag; // 해시태그
 
     @ToString.Exclude
-    @OrderBy("id")
+    @OrderBy("createdAt DESC")
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private final Set<ArticleComment> articleComments = new LinkedHashSet<>(); // 양방향 바인딩
 
@@ -51,14 +51,15 @@ public class Article extends AuditingFields {
     // 평소에는 오픈하지 않기 때문에 public을 사용하지 않는다.
     protected Article(){}
 
-    private Article(String title, String content, String hashtag) {
+    private Article(UserAccount userAccount,String title, String content, String hashtag) {
+        this.userAccount = userAccount;
         this.title = title;
         this.content = content;
         this.hashtag = hashtag;
     }
 
-    public static Article of (String title, String content, String hashtag) {
-        return new Article(title, content, hashtag);
+    public static Article of (UserAccount userAccount,String title, String content, String hashtag) {
+        return new Article(userAccount,title, content, hashtag);
     }
 
     @Override
