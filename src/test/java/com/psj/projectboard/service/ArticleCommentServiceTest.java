@@ -30,7 +30,7 @@ class ArticleCommentServiceTest {
     @InjectMocks
     private ArticleCommentService sut;
 
-    @Mock private ArticleRepository articleRepository;
+    @Mock private ArticleRepository articleRepository; // @Mock : Serivce 레이어를 테스트할 때, Repository를 가짜 객체로 만드는 용도로 사용될 수 있다.
     @Mock private ArticleCommentRepository articleCommentRepository;
 
     @DisplayName("게시글 ID로 조회하면, 해당하는 댓글 리스트를 반환한다.")
