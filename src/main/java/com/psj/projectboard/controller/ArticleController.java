@@ -4,7 +4,9 @@ import com.psj.projectboard.domain.type.SearchType;
 import com.psj.projectboard.response.ArticleResponse;
 import com.psj.projectboard.response.ArticleWithCommentsResponse;
 import com.psj.projectboard.service.ArticleService;
+import com.psj.projectboard.service.PaginationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -15,12 +17,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @RequiredArgsConstructor // final이 붙거나 @NotNull 이 붙은 필드의 생성자를 자동 생성해주는 롬복 어노테이션
 @RequestMapping("/articles")
 @Controller
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final PaginationService paginationService;
 
     @GetMapping
     public String articles(
@@ -29,7 +34,11 @@ public class ArticleController {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             ModelMap map
     ) {
-        map.addAttribute("articles", articleService.searchArticles(searchType,searchValue,pageable).map(ArticleResponse::from)); // searchArticles가 dto를 보내주기 때문에 mapper로 가공해준다.
+        Page<ArticleResponse> articles = articleService.searchArticles(searchType,searchValue,pageable).map(ArticleResponse::from);
+        List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
+
+        map.addAttribute("articles", articles); // searchArticles가 dto를 보내주기 때문에 mapper로 가공해준다.
+        map.addAttribute("paginationBarNumbers", barNumbers);
         return "articles/index";
     }
 
