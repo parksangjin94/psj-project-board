@@ -28,13 +28,13 @@ public class ArticleController {
     private final PaginationService paginationService;
 
     @GetMapping
-    public String articles(
+    public String articles(   // 게시글 내보내 주는 기능
             @RequestParam(required = false) SearchType searchType,
             @RequestParam(required = false) String searchValue,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,  // 페이지의 기본 정렬 사항
             ModelMap map
     ) {
-        Page<ArticleResponse> articles = articleService.searchArticles(searchType,searchValue,pageable).map(ArticleResponse::from);
+        Page<ArticleResponse> articles = articleService.searchArticles(searchType,searchValue,pageable).map(ArticleResponse::from); // Page인터페이스 안에 정렬 기능이 존재한다.
         List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
 
         map.addAttribute("articles", articles); // searchArticles가 dto를 보내주기 때문에 mapper로 가공해준다.
