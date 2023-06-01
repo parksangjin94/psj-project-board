@@ -1,6 +1,7 @@
 package com.psj.projectboard.controller;
 
 import com.psj.projectboard.config.SecurityConfig;
+import com.psj.projectboard.domain.type.SearchType;
 import com.psj.projectboard.dto.ArticleWithCommentsDto;
 import com.psj.projectboard.dto.UserAccountDto;
 import com.psj.projectboard.service.ArticleService;
@@ -64,9 +65,32 @@ class ArticleControllerTest {
         BDDMockito.then(paginationService).should().getPaginationBarNumbers(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
     }
 
+    @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 검색어와 함께 호출")
+    @Test
+    public void givenSearchKeyword_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
+        // Given
+        SearchType searchType =SearchType.TITLE;
+        String searchValue = "title";
+        BDDMockito.given(articleService.searchArticles(ArgumentMatchers.eq(searchType),ArgumentMatchers.eq(searchValue),ArgumentMatchers.any(Pageable.class))).willReturn(Page.empty());
+        BDDMockito.given(paginationService.getPaginationBarNumbers(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).willReturn(List.of(0, 1, 2, 3, 4));
+
+        // When & Then
+        mvc.perform(MockMvcRequestBuilders.get("/articles")
+                        .queryParam("searchType", searchType.name()) // enum의 name()과 toString()은 모두 Enum의 값을 string으로 표현한다. name()과 toString()의 주요 차이점은 메소드의 재정의 가능 여부이다. name()은 final 메소드이므로 재정의할 수 없지만 toString()은 재정의가 가능하다.
+                        .queryParam("searchValue", searchValue)   // queryparam : url을 통해 넘어온 데이터를 변수에 저장할수 있음
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(MockMvcResultMatchers.view().name("articles/index"))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("articles")) // map에 ""키가 있는지 확인
+                .andExpect(MockMvcResultMatchers.model().attributeExists("searchTypes"));
+        BDDMockito.then(articleService).should().searchArticles(ArgumentMatchers.eq(searchType),ArgumentMatchers.eq(searchValue), ArgumentMatchers.any(Pageable.class));
+        BDDMockito.then(paginationService).should().getPaginationBarNumbers(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
+    }
+
     @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 페이징, 정렬 기능")
     @Test
-    void givenPagingAndSortingParams_whenSearchingArticlesPage_thenReturnsArticlesPage() throws Exception {
+    void givenPagingAndSortingParams_whenSearchingArticlesView_thenReturnsArticlesView() throws Exception {
         // Given
         String sortName = "title";
         String direction = "desc";
