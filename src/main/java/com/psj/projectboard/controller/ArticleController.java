@@ -49,6 +49,7 @@ public class ArticleController {
         ArticleWithCommentsResponse article = ArticleWithCommentsResponse.from(articleService.getArticle(articleId));
         map.addAttribute("article",article );
         map.addAttribute("articleComments", article.articleCommentsResponse());
+        map.addAttribute("totalCount", articleService.getArticleCount());
         return "articles/detail";
 /*  1. @GetMapping path의 {변수} 괄호안에 괄호 그레이스를 열어 URI에 사용될 변수 명을 입력한다.
 

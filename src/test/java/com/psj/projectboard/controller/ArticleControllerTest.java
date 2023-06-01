@@ -119,12 +119,14 @@ class ArticleControllerTest {
 
 
 //    @Disabled("구현 중") // 테스트를 통과하지 못할 시 빌드가 실패하기 때문에 처리
-    @DisplayName("[view][GET] 게시글 상세 페이지 - 정상 호출")
+    @DisplayName("[view][GET] 게시글 페이지 - 정상 호출")
     @Test
     public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
         // Given
         Long articleId = 1l;
+        long totalCount = 1l;
         BDDMockito.given(articleService.getArticle(articleId)).willReturn(createArticleWithCommentsDto());
+        BDDMockito.given(articleService.getArticleCount()).willReturn(totalCount);
 
 
         // When & Then
@@ -133,8 +135,10 @@ class ArticleControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(MockMvcResultMatchers.view().name("articles/detail"))
                 .andExpect(MockMvcResultMatchers.model().attributeExists("article")) // map에 ""키가 있는지 확인
-                .andExpect(MockMvcResultMatchers.model().attributeExists("articleComments"));
+                .andExpect(MockMvcResultMatchers.model().attributeExists("articleComments"))
+                .andExpect(MockMvcResultMatchers.model().attribute("totalCount", totalCount));
         BDDMockito.then(articleService).should().getArticle(articleId);
+        BDDMockito.then(articleService).should().getArticleCount();
     }
 
     @Disabled("구현 중") // 테스트를 통과하지 못할 시 빌드가 실패하기 때문에 처리
