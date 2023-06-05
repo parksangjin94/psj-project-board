@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -48,9 +49,9 @@ class ArticleServiceTest {
     }
 
 
-    @DisplayName("게시글을 검색하면, 게시글 리스트를 반환한다.")
+    @DisplayName("검색어와 함께 게시글을 검색하면, 게시글 페이지를 반환한다.")
     @Test
-    void givenSearchParameters_whenSearchingArticles_thenReturnsArticleList(){
+    void givenSearchParameters_whenSearchingArticles_thenReturnsArticlePage(){
         // Given
 
         // Pageble을 파라미터로하여 가져온 결과물은 Page<SomeObject> 형태로 반환 되며,
@@ -68,6 +69,37 @@ class ArticleServiceTest {
         assertThat(articles).isEmpty();
         BDDMockito.then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
     }
+
+    @DisplayName("검색어 없이 게시글을 해시태그 검색하면, 빈 페이지를 반환한다.")
+    @Test
+    void givenNoSearchParameters_whenSearchingArticlesViaHashtag_thenReturnsEmptyPage(){
+        // Given
+        Pageable pageable = Pageable.ofSize(20);
+
+        // When
+        Page<ArticleDto> articles = sut.searchArticlesViaHashtag(null, pageable);
+
+        // Then
+        assertThat(articles).isEqualTo(Page.empty(pageable));
+        BDDMockito.then(articleRepository).shouldHaveNoInteractions();  // articleRepository가 호출이 되지 않는지 검사, 없어야 통과
+    }
+
+    @DisplayName("게시글을 해시태그 검색하면, 게시글 페이지를 반환한다.")
+    @Test
+    void givenHashtag_whenSearchingArticlesViaHashtag_thenReturnsArticlesPage(){
+        // Given
+        String hashtag = "#java";
+        Pageable pageable = Pageable.ofSize(20);
+        BDDMockito.given(articleRepository.findByHashtag(hashtag, pageable)).willReturn(Page.empty(pageable));
+
+        // When
+        Page<ArticleDto> articles = sut.searchArticlesViaHashtag(hashtag, pageable);
+
+        // Then
+        assertThat(articles).isEqualTo(Page.empty(pageable));
+        BDDMockito.then(articleRepository).should().findByHashtag(hashtag,pageable);  // articleRepository가 findByHashtag를 호출 하는지 검사
+    }
+
     @DisplayName("게시글을 조회하면, 게시글을 반환한다.")
     @Test
     void givenArticleId_whenSearchingArticle_thenReturnsArticle() {
@@ -86,6 +118,8 @@ class ArticleServiceTest {
                 .hasFieldOrPropertyWithValue("hashtag", article.getHashtag());
         BDDMockito.then(articleRepository).should().findById(articleId);
     }
+
+
 
     @DisplayName("없는 게시글을 조회하면, 예외를 던진다.")
     @Test
@@ -178,6 +212,21 @@ class ArticleServiceTest {
         // Then
         assertThat(actual).isEqualTo(expected);
         BDDMockito.then(articleRepository).should().count();
+    }
+
+    @DisplayName("해시태그를 조회하면, 유니크 해시태그 리스트를 반환한다.")
+    void givenNothing_whenCalling_thenReturnsHashtags(){
+        // Given
+        List<String> expectedHashtags = List.of("#java", "#spring", "#boot");
+        BDDMockito.given(articleRepository.findAllDistinctHashtags()).willReturn(expectedHashtags);
+
+        // When
+        List<String> actualHashtags = sut.getHashtags();
+
+        // Then
+        assertThat(actualHashtags).isEqualTo(expectedHashtags);
+        BDDMockito.then(articleRepository).should().findAllDistinctHashtags();
+
     }
 
 

@@ -1,5 +1,6 @@
 package com.psj.projectboard.controller;
 
+import com.psj.projectboard.domain.Article;
 import com.psj.projectboard.domain.type.SearchType;
 import com.psj.projectboard.response.ArticleResponse;
 import com.psj.projectboard.response.ArticleWithCommentsResponse;
@@ -56,5 +57,23 @@ public class ArticleController {
        GetMapping 뿐만 아니라 당연히 다른 Method도 가능하다.  ( PostMapping, DeleteMapping, PutMapping......)
 
     2. @PathVariable 어노테이션을 이용해서 {템플릿 변수} 와 동일한 이름을 갖는 파라미터를 추가하면 된다. */
+    }
+
+    @GetMapping("/search-hashtag")
+    public String searchHashtag(
+            @RequestParam(required = false) String searchValue,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            ModelMap map
+    ){
+        Page<ArticleResponse> articles = articleService.searchArticlesViaHashtag(searchValue, pageable).map(ArticleResponse::from);
+        List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
+        List<String> hashtags = articleService.getHashtags();
+
+        map.addAttribute("articles", articles);
+        map.addAttribute("hashtags", hashtags);
+        map.addAttribute("paginationBarNumbers", barNumbers);
+        map.addAttribute("searchType", SearchType.HASHTAG);
+
+        return "articles/search-hashtag";
     }
 }
